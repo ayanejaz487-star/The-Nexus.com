@@ -443,11 +443,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (deletePhotoBtn) {
         deletePhotoBtn.onclick = () => {
-            currentUser.photo = defaultPhoto;
-            users = users.map(u => u.email === currentUser.email ? { ...u, photo: defaultPhoto } : u);
-            localStorage.setItem("users", JSON.stringify(users));
-            localStorage.setItem("currentUser", JSON.stringify(currentUser));
-            updateUI();
+            if (confirm("Are you sure you want to delete your profile photo?")) {
+                currentUser.photo = defaultPhoto;
+                users = users.map(u => u.email === currentUser.email ? { ...u, photo: defaultPhoto } : u);
+                localStorage.setItem("users", JSON.stringify(users));
+                localStorage.setItem("currentUser", JSON.stringify(currentUser));
+                updateUI();
+            }
         };
     }
 

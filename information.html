@@ -167,6 +167,7 @@
     <div class="popupBox">
         <img id="popupProfilePic" src="userPhoto.jpg">
         <div id="menuUsername"></div>
+        <button id="deletePhotoBtn">Delete Photo</button> 
         <button id="changePhotoBtn">Change Photo</button>
         <button id="logoutBtn">Logout</button>
         <button id="signUpBtn">Sign Up</button>
@@ -238,6 +239,13 @@
                 }
                 if (changePhotoBtn) changePhotoBtn.style.display = "block";
                 if (logoutBtn) logoutBtn.style.display = "block";
+                
+                // --- UPDATE: Only show delete button if photo is NOT default ---
+                if (deletePhotoBtn && currentUser.photo && currentUser.photo !== defaultPhoto) {
+                    deletePhotoBtn.style.display = "block";
+                } else {
+                    deletePhotoBtn.style.display = "none";
+                }
             } else {
                 if (profilePic) profilePic.src = defaultPhoto;
                 if (popupProfilePic) popupProfilePic.src = defaultPhoto;
@@ -298,15 +306,30 @@
         if (changePhotoBtn) {
             changePhotoBtn.onclick = () => photoInput.click();
             photoInput.onchange = function() {
-                const reader = new FileReader();
-                reader.onload = function() {
-                    currentUser.photo = reader.result;
-                    users = users.map(u => u.email === currentUser.email ? { ...u, photo: reader.result } : u);
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        currentUser.photo = reader.result;
+                        users = users.map(u => u.email === currentUser.email ? { ...u, photo: reader.result } : u);
+                        localStorage.setItem("users", JSON.stringify(users));
+                        localStorage.setItem("currentUser", JSON.stringify(currentUser));
+                        location.reload();
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            };
+        }
+
+        if (deletePhotoBtn) {
+            deletePhotoBtn.onclick = () => {
+                // --- UPDATE: Added confirmation dialog ---
+                if (confirm("Are you sure you want to delete your profile photo?")) {
+                    currentUser.photo = defaultPhoto;
+                    users = users.map(u => u.email === currentUser.email ? { ...u, photo: defaultPhoto } : u);
                     localStorage.setItem("users", JSON.stringify(users));
                     localStorage.setItem("currentUser", JSON.stringify(currentUser));
                     location.reload();
-                };
-                reader.readAsDataURL(this.files[0]);
+                }
             };
         }
 

@@ -169,6 +169,7 @@
     <div class="popupBox">
         <img id="popupProfilePic" src="userPhoto.jpg">
         <div id="menuUsername" style="margin-bottom: 10px; font-weight: bold;"></div>
+        <button id="deletePhotoBtn">Delete Photo</button> 
         <button id="changePhotoBtn">Change Photo</button>
         <button id="logoutBtn">Logout</button>
         <button id="signUpBtn">Sign Up</button>
@@ -209,6 +210,7 @@
         const menubox = document.getElementById("menubox");
         const menuUsername = document.getElementById("menuUsername");
         const changePhotoBtn = document.getElementById("changePhotoBtn");
+        const deletePhotoBtn = document.getElementById("deletePhotoBtn");
         const logoutBtn = document.getElementById("logoutBtn");
         const photoInput = document.getElementById("photoInput");
         const defaultPhoto = "userPhoto.jpg";
@@ -225,10 +227,18 @@
                 profilePic.src = currentUser.photo || defaultPhoto;
                 popupProfilePic.src = currentUser.photo || defaultPhoto;
                 menuUsername.textContent = "Hi, " + currentUser.username;
+                
+                // Only show delete button if the photo is NOT the default photo
+                if (currentUser.photo && currentUser.photo !== defaultPhoto) {
+                    deletePhotoBtn.style.display = "block";
+                } else {
+                    deletePhotoBtn.style.display = "none";
+                }
             } else {
                 profilePic.src = defaultPhoto;
                 popupProfilePic.src = defaultPhoto;
                 menuUsername.textContent = "";
+                deletePhotoBtn.style.display = "none";
             }
         }
         updateUI();
@@ -284,6 +294,20 @@
             };
             reader.readAsDataURL(this.files[0]);
         };
+
+        if (deletePhotoBtn) {
+            deletePhotoBtn.onclick = () => {
+                // Added confirmation prompt
+                if (confirm("Are you sure you want to delete your photo?")) {
+                    currentUser.photo = defaultPhoto;
+                    users = users.map(u => u.email === currentUser.email ? { ...u, photo: defaultPhoto } : u);
+                    localStorage.setItem("users", JSON.stringify(users));
+                    localStorage.setItem("currentUser", JSON.stringify(currentUser));
+                    updateUI();
+                    location.reload();
+                }
+            };
+        }
 
         logoutBtn.onclick = () => {
             if (confirm("Logout?")) {

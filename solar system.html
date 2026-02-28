@@ -115,6 +115,7 @@
             height: 50px;
             border-radius: 50%;
             cursor: pointer;
+            object-fit: cover;
         }
 
         #profilePopup {
@@ -143,6 +144,7 @@
             height: 80px;
             border-radius: 50%;
             margin-bottom: 10px;
+            object-fit: cover;
         }
 
         .popupBox button {
@@ -173,6 +175,7 @@
     <div class="popupBox">
         <img id="popupProfilePic" src="userPhoto.jpg">
         <div id="menuUsername"></div>
+        <button id="deletePhotoBtn">Delete Photo</button> 
         <button id="changePhotoBtn">Change Photo</button>
         <button id="logoutBtn">Logout</button>
         <button id="signUpBtn">Sign Up</button>
@@ -243,6 +246,7 @@
             loginBtn.style.display = "none";
             if (changePhotoBtn) changePhotoBtn.style.display = "none";
             if (logoutBtn) logoutBtn.style.display = "none";
+            if (deletePhotoBtn) deletePhotoBtn.style.display = "none"; // Hidden by default
             if (menuUsername) menuUsername.style.display = "none";
 
             if (currentUser) {
@@ -254,6 +258,11 @@
                 }
                 if (changePhotoBtn) changePhotoBtn.style.display = "block";
                 if (logoutBtn) logoutBtn.style.display = "block";
+
+                // Only show delete button if current photo is NOT the default one
+                if (currentUser.photo && currentUser.photo !== defaultPhoto) {
+                    if (deletePhotoBtn) deletePhotoBtn.style.display = "block";
+                }
             } else {
                 if (profilePic) profilePic.src = defaultPhoto;
                 if (popupProfilePic) popupProfilePic.src = defaultPhoto;
@@ -310,6 +319,7 @@
         if (changePhotoBtn) {
             changePhotoBtn.onclick = () => photoInput.click();
             photoInput.onchange = function() {
+                if (!this.files[0]) return;
                 const reader = new FileReader();
                 reader.onload = function() {
                     currentUser.photo = reader.result;
@@ -321,6 +331,20 @@
                 reader.readAsDataURL(this.files[0]);
             };
         }
+
+    if (deletePhotoBtn) {
+        deletePhotoBtn.onclick = () => {
+            // Ask for confirmation
+            if (confirm("Are you sure you want to delete your photo?")) {
+                currentUser.photo = defaultPhoto;
+                users = users.map(u => u.email === currentUser.email ? { ...u, photo: defaultPhoto } : u);
+                localStorage.setItem("users", JSON.stringify(users));
+                localStorage.setItem("currentUser", JSON.stringify(currentUser));
+                updateUI();
+                location.reload();
+            }
+        };
+    }
 
         if (logoutBtn) logoutBtn.onclick = () => { if (confirm("Logout?")) { localStorage.removeItem("currentUser"); window.location.href = "index.html"; } };
 
